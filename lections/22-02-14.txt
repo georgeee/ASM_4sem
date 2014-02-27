@@ -1,0 +1,65 @@
+yasm -f (win32|elf|macho) a.asm
+--- Отладка
+ 	 -g cv8 //win
+ 	 -g dwarf2
+
+
+Линковка: под вин юзаем link.exe из любой не очень старой вижуалки
+	link.exe subsystem:(console|windows) /libpath:s:\progr\..\lib /defaultlib:kernel32.lib /entry:start
+
+--------------
+Unix
+
+gcc a.o //Линкуем ч/з Gcc, связываем с libc
+//+ флажок "32бит программа"
+Начало ч метки main
+
+
+==============================
+Windows
+
+extern __imp__MessageBoxA@16 //Под виндой показать окошко
+extern __imp__ExitProcess@4
+%assign MB_ICON_INFORMATION 40h //какой-то define
+
+
+Секции программы:
+
+.text //code
+.data //inited rw
+.rdata //inited ro
+.bss //не инициализированные данные
+
+sections are being kept in .exe file, during program initialisation they are to be put to memory
+
+global _start: //label, from hich we start
+
+push MB ...      //arg 3
+push hello_title //arg 2
+push hello_msg   //arg 1
+push 0           //arg 0
+call [__imp__MessageBoxA@16]
+push 0
+call [__ExitProcess@4]
+
+
+section .rdsata
+hello_title; db "title", 0
+hello_msg: db "Hello, World!", 0
+
+    end
+
+
+If we call function wothout '__imp__', linker creates a wrapper for it
+call [_MessageBoxA@16]
+
+
+--- ч/з libc, а не сисколы напрямую
+start:
+push hello_msg
+call printf
+add esp,4
+xor eax, eax
+ret
+
+

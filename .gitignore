@@ -1,0 +1,7 @@
+*.o
+*.out
+*.un~
+*.swp
+*.swo
+.swo
+.swp
