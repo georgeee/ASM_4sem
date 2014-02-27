@@ -10,7 +10,6 @@ section     .text
 main :
     mov eax, 1234
     mov esi, 1999999Ah ;1/10 * 2^32
-    mov edi, 10
     mov ebx, str1
     main_loop:
         mov ecx, eax
