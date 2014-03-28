@@ -288,8 +288,9 @@ _read_number :
     cmp eax, [orig_input_str]
     je _rn_label4
     xor ebp, 0x1
+    
     _rn_label4:
-
+    mov edi, [number]
     test edi, 0x80000000
     jz _rn_label5
     xor ebp, 0x1
