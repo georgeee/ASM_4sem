@@ -28,11 +28,7 @@ _print :
 
     ret
 
-;assumes, that edx contains length ow raw10 string, edi - output buffer
-_print_formated:
-    mov ebp, [format]
-    mov esi, sub_res
-
+_pf_print_sign:
     test ebp, 0x1
     jz _pf_label1
     mov byte [edi], 45
@@ -53,12 +49,33 @@ _print_formated:
     inc edi
     
     _pf_label3:
+    ret
+
+_pf_print_indent:
     test ebp, 0x20
-    jz _pf_print_raw_10_label
+    jz _pf_print_indent_end
     test ebp, 0x4
-    jnz _pf_print_raw_10_label
+    jnz _pf_print_indent_end
     call _print_indent
     
+    _pf_print_indent_end:
+    ret
+
+;assumes, that edx contains length ow raw10 string, edi - output buffer
+_print_formated:
+    mov ebp, [format]
+    mov esi, sub_res
+    
+    test ebp, 0x8
+    jnz _pf_0_indent
+    call _pf_print_indent
+    call _pf_print_sign
+    jmp _pf_print_raw_10_label
+
+    _pf_0_indent:
+    call _pf_print_sign
+    call _pf_print_indent
+
     _pf_print_raw_10_label:
     xor ecx, ecx
     _loop4:
@@ -197,8 +214,8 @@ _print_raw10:
         _pr_label1:
         mov ebx, ecx
         sub ecx, edx
-        call _sub
         _pr_label2:
+        call _sub
         cmp ecx, 1
         ja bin_search_loop
 
