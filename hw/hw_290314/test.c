@@ -62,6 +62,33 @@ int test(const char * format, long long min, long long max){
     return res;
 }
 
+/* next lexicographical permutation */
+int next_lex_perm(char *a, int n) {
+#define swap(i, j) {t = a[i]; a[i] = a[j]; a[j] = t;}
+    int k, l, t;
+
+    /* 1. Find the largest index k such that a[k] < a[k + 1]. If no
+     * such
+     *        index exists, the permutation is the last permutation. */
+    for (k = n - 1; k && a[k - 1] >= a[k]; k--);
+    if (!k--) return 0;
+
+    /* 2. Find the largest index l such that a[k] < a[l]. Since
+     * k + 1 is
+     *     such an index, l is well defined */
+    for (l = n - 1; a[l] <= a[k]; l--);
+
+    /* 3. Swap a[k] with a[l] */
+    swap(k, l);
+
+    /* 4. Reverse the sequence from a[k + 1] to the end
+     * */
+    for (k++, l = n - 1; l > k; l--, k++)
+        swap(k, l);
+    return 1;
+#undef swap
+}
+
 int test_format(){
     int mask = 0;
     char format[100];
@@ -73,20 +100,30 @@ int test_format(){
     widths[wc++] = 20;
     widths[wc++] = 50;
     widths[wc++] = 100;
-    for(; mask < (1<<4); mask++){
-        int fl = 0;
-        if(mask & (1<<0)) format[fl++] = '0';
-        if(mask & (1<<1)) format[fl++] = ' ';
-        if(mask & (1<<2)) format[fl++] = '-';
-        if(mask & (1<<3)) format[fl++] = '+';
-        int w = 0;
-        for(; w < wc; ++w){
-            if(widths[w] == 0) format[fl] = 0;
-            else sprintf(format + fl, "%d", widths[w]);
-            if(!test(format, -1000, 1000)) return 0;
+    char modifiers[10];
+    modifiers[0] = ' ';
+    modifiers[1] = '+';
+    modifiers[2] = '-';
+    modifiers[3] = '0';
+    modifiers[4] = '\0';
+    int j;
+    for(j = 0; j < 24; ++j){
+        for(; mask < (1<<4); mask++){
+            int fl = 0;
+            int i = 0;
+            for(; i < 4; ++i)
+                if(mask & (1<<i)) format[fl++] = modifiers[i];
+            int w = 0;
+            for(; w < wc; ++w){
+                if(widths[w] == 0) format[fl] = 0;
+                else sprintf(format + fl, "%d", widths[w]);
+                if(!test(format, -1000, 1000)) return 0;
+            }
         }
+        next_lex_perm(modifiers, 4);
     }
 }
+
 
 int main(int argc, char ** argv){
     test_format();
